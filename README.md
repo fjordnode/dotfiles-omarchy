@@ -4,7 +4,7 @@ My personal configuration for [Omarchy](https://omarchy.dev) - a Hyprland-based 
 
 ## What's Included
 
-- **hypr/** - Hyprland keybindings and monitor config (4K @ 144Hz)
+- **hypr/** - Hyprland keybindings
 - **ghostty/** - Ghostty terminal config with zsh as default shell
 - **oh-my-posh/** - Custom prompt theme with dynamic colors
 - **omarchy-hooks/** - Theme hook that syncs oh-my-posh colors with omarchy themes
@@ -50,6 +50,5 @@ ln -sf ~/dotfiles-omarchy/zsh/.zshrc.local ~/.zshrc.local
 
 ## Notes
 
-- `monitors.conf` is configured for a 4K display at 1.33x scale - adjust for your setup
 - The theme sync uses FIFOs in `/tmp/zsh-reload-*` for IPC between shells
 - Requires your main zshrc to source `~/.zshrc.local`
