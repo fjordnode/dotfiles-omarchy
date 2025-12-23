@@ -1,0 +1,39 @@
+# Theme reload mechanism using FIFO + zle -F
+# Calls _omp_precmd to regenerate PROMPT before redraw
+
+_theme_reload_setup() {
+  local fifo="/tmp/zsh-reload-$$"
+  [[ -p "$fifo" ]] || mkfifo "$fifo" 2>/dev/null
+  exec {_reload_fd}<>"$fifo"
+
+  _theme_reload_handler() {
+    local dummy
+    read -r dummy <&$_reload_fd 2>/dev/null
+    # Re-init oh-my-posh with new config
+    eval "$(oh-my-posh init zsh --config ~/.config/oh-my-posh/config.json)"
+    # Manually call precmd to regenerate PROMPT
+    _omp_precmd 2>/dev/null
+    # Force redraw with new PROMPT
+    zle .reset-prompt
+    zle -R
+  }
+
+  zle -N _theme_reload_handler
+  zle -F $_reload_fd _theme_reload_handler
+  zshexit() { rm -f "$fifo" 2>/dev/null }
+}
+
+_theme_reload_setup
+
+# Silently ignore unrecognized key sequences
+_noop() { }
+zle -N _noop
+
+# Various modifier+enter combos that terminals send
+bindkey '\e[11;13~' _noop
+bindkey '\e[13;11~' _noop
+bindkey '\e[27;13~' _noop
+bindkey '\e[1;13~' _noop
+bindkey ';11;13~' _noop
+bindkey '11;13~' _noop
+bindkey ';13~' _noop

@@ -1,0 +1,168 @@
+#!/bin/bash
+
+# Extract colors from current theme's kitty.conf
+KITTY_THEME="$HOME/.config/omarchy/current/theme/kitty.conf"
+OMP_CONFIG="$HOME/.config/oh-my-posh/config.json"
+
+if [[ ! -f "$KITTY_THEME" ]]; then
+    exit 0
+fi
+
+# Extract colors from kitty config
+get_color() {
+    grep "^$1 " "$KITTY_THEME" | awk '{print $2}' | head -1
+}
+
+BG=$(get_color "background")
+FG=$(get_color "foreground")
+SURFACE=$(get_color "color8")
+SURFACE_BRIGHT=$(get_color "active_border_color")
+BLUE=$(get_color "color4")
+GREEN=$(get_color "color2")
+YELLOW=$(get_color "color3")
+PINK=$(get_color "color5")
+TEAL=$(get_color "color6")
+RED=$(get_color "color1")
+
+# Fallbacks if colors not found
+BG=${BG:-#1e1e2e}
+FG=${FG:-#cdd6f4}
+SURFACE=${SURFACE:-#313244}
+SURFACE_BRIGHT=${SURFACE_BRIGHT:-#45475a}
+BLUE=${BLUE:-#89b4fa}
+GREEN=${GREEN:-#a6e3a1}
+YELLOW=${YELLOW:-#fab387}
+PINK=${PINK:-#f5c2e7}
+TEAL=${TEAL:-#94e2d5}
+RED=${RED:-#f38ba8}
+
+# Update oh-my-posh config palette
+if [[ -f "$OMP_CONFIG" ]]; then
+    # Create new config with updated palette
+    cat > "$OMP_CONFIG" << EOF
+{
+  "\$schema": "https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.json",
+  "palette": {
+    "theme-bg": "$BG",
+    "theme-surface": "$SURFACE",
+    "theme-surface-bright": "$SURFACE_BRIGHT",
+    "theme-blue": "$BLUE",
+    "theme-green": "$GREEN",
+    "theme-yellow": "$YELLOW",
+    "theme-pink": "$PINK",
+    "theme-teal": "$TEAL",
+    "theme-text": "$FG",
+    "theme-red": "$RED"
+  },
+  "blocks": [
+    {
+      "alignment": "left",
+      "segments": [
+        {
+          "background": "p:theme-surface",
+          "foreground": "p:theme-text",
+          "style": "diamond",
+          "leading_diamond": "\ue0b6",
+          "template": "{{ if .WSL }}WSL at{{ end }}{{.Icon}} ",
+          "type": "os"
+        },
+        {
+          "background": "p:theme-surface-bright",
+          "foreground": "p:theme-text",
+          "style": "powerline",
+          "powerline_symbol": "\ue0b0",
+          "template": " {{ .HostName }} ",
+          "type": "session"
+        },
+        {
+          "background": "p:theme-blue",
+          "foreground": "p:theme-bg",
+          "properties": {
+            "style": "agnoster_short",
+            "folder_icon": "…",
+            "home_icon": "~"
+          },
+          "style": "diamond",
+          "trailing_diamond": "\ue0b4",
+          "template": " {{ .Path }} ",
+          "type": "path"
+        },
+        {
+          "background": "p:theme-green",
+          "background_templates": [
+            "{{ if or (.Working.Changed) (.Staging.Changed) }}p:theme-yellow{{ end }}",
+            "{{ if and (gt .Ahead 0) (gt .Behind 0) }}p:theme-pink{{ end }}",
+            "{{ if gt .Ahead 0 }}p:theme-pink{{ end }}",
+            "{{ if gt .Behind 0 }}p:theme-pink{{ end }}"
+          ],
+          "foreground": "p:theme-bg",
+          "properties": {
+            "branch_template": "{{ trunc 25 .Branch }}",
+            "fetch_status": true,
+            "branch_icon": "\uE0A0 ",
+            "branch_identical_icon": "\u25CF"
+          },
+          "style": "diamond",
+          "trailing_diamond": "\ue0b4",
+          "template": " {{ .HEAD }}{{if .BranchStatus }} {{ .BranchStatus }}{{ end }}{{ if .Working.Changed }} \uf044 {{ .Working.String }}{{ end }}{{ if and (.Working.Changed) (.Staging.Changed) }} |{{ end }}{{ if .Staging.Changed }} \uf046 {{ .Staging.String }}{{ end }} ",
+          "type": "git"
+        }
+      ],
+      "type": "prompt"
+    },
+    {
+      "alignment": "right",
+      "segments": [
+        {
+          "background": "p:theme-surface-bright",
+          "foreground": "p:theme-text",
+          "style": "diamond",
+          "leading_diamond": "\ue0b6",
+          "trailing_diamond": "\ue0b4",
+          "template": " {{ if not .Error }}{{ .Icon }}{{ .Percentage }}%{{ end }} ",
+          "properties": {
+            "discharging_icon": "\uE234 ",
+            "charging_icon": "\uF1E6 ",
+            "charged_icon": "\uE234 "
+          },
+          "type": "battery"
+        }
+      ],
+      "type": "prompt"
+    },
+    {
+      "alignment": "left",
+      "newline": true,
+      "segments": [
+        {
+          "foreground": "p:theme-green",
+          "foreground_templates": [
+            "{{ if gt .Code 0 }}p:theme-red{{ end }}"
+          ],
+          "properties": {
+            "always_enabled": true
+          },
+          "style": "plain",
+          "template": "❯ ",
+          "type": "exit"
+        }
+      ],
+      "type": "prompt"
+    }
+  ],
+  "transient_prompt": {
+    "background": "transparent",
+    "foreground": "p:theme-blue",
+    "template": "❯ "
+  },
+  "final_space": false,
+  "disable_notice": true,
+  "version": 3
+}
+EOF
+fi
+
+# Signal all zsh shells to reload via their FIFOs
+for fifo in /tmp/zsh-reload-*; do
+  [[ -p "$fifo" ]] && echo "reload" > "$fifo" 2>/dev/null &
+done
