@@ -60,8 +60,28 @@ if [[ -f ~/.zshrc.local ]]; then
 fi
 ln -sf "$(pwd)/zsh/.zshrc.local" ~/.zshrc.local
 
+# Configure .zshrc if oh-my-zsh is installed
+if [[ -f ~/.zshrc ]]; then
+    echo "==> Configuring .zshrc..."
+
+    # Disable ZSH_THEME (oh-my-posh handles prompt)
+    sed -i 's/^ZSH_THEME=.*/ZSH_THEME=""/' ~/.zshrc
+
+    # Update plugins list
+    sed -i 's/^plugins=.*/plugins=(git zsh-autosuggestions zsh-syntax-highlighting zsh-completions history-substring-search fzf-tab)/' ~/.zshrc
+
+    # Add oh-my-posh init and source .zshrc.local if not already present
+    if ! grep -q "oh-my-posh init zsh" ~/.zshrc; then
+        cat >> ~/.zshrc << 'EOF'
+
+# Oh My Posh prompt
+eval "$(oh-my-posh init zsh --config ~/.config/oh-my-posh/config.json)"
+
+# Source local config
+[[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
+EOF
+    fi
+fi
+
 echo ""
-echo "==> Done! Restart your terminals or run 'exec zsh'"
-echo ""
-echo "Note: Your monitors.conf may need adjusting for your display."
-echo "Edit ~/.config/hypr/monitors.conf as needed."
+echo "==> Done! Restart your terminal or run 'source ~/.zshrc'"
