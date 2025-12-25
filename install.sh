@@ -48,7 +48,7 @@ done
 cd "$(dirname "$0")"
 echo "==> Stowing configs..."
 
-for dir in hypr ghostty oh-my-posh omarchy-hooks; do
+for dir in hypr ghostty kitty waybar xdg-terminal-exec oh-my-posh omarchy-hooks; do
     echo "  Stowing $dir..."
     stow -v --target="$HOME" "$dir"
 done

@@ -34,6 +34,12 @@ keybind = super+control+shift+alt+arrow_up=resize_split:up,100
 keybind = super+control+shift+alt+arrow_left=resize_split:left,100
 keybind = super+control+shift+alt+arrow_right=resize_split:right,100
 
-# Slowdown mouse scrolling
-mouse-scroll-multiplier = 0.95
+# Scroll multipliers: precision=touchpad, discrete=mouse wheel
+mouse-scroll-multiplier = precision:2,discrete:1
 keybind = shift+enter=text:\x1b\r
+
+# Suppress Ctrl+. (otherwise sends CSI u garbage)
+keybind = ctrl+.=ignore
+
+# Disable Ctrl+Enter fullscreen (use Super+F instead via Hyprland)
+keybind = ctrl+enter=unbind

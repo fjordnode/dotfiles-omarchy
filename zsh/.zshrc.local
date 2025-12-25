@@ -51,5 +51,5 @@ bindkey ';11;13~' _noop
 bindkey '11;13~' _noop
 bindkey ';13~' _noop
 
-# CSI u sequences (kitty keyboard protocol) - Ctrl+key combos
-bindkey '\e[46;5u' _noop  # Ctrl+.
+# Disable CSI u / kitty keyboard protocol (causes garbage like [46;5u)
+echo -ne '\e[>4;0m'
